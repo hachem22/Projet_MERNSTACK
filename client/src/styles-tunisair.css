@@ -1,0 +1,204 @@
+/* Thème Tunisair - Couleurs officielles */
+:root {
+  --tunisair-blue: #005baa;
+  --tunisair-red: #d40511;
+  --tunisair-light: #e6f2ff;
+  --tunisair-dark: #003366;
+  --text-light: #ffffff;
+  --text-dark: #333333;
+  --shadow: 0 4px 12px rgba(0, 91, 170, 0.15);
+}
+
+/* Styles de base */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9f9f9;
+  color: var(--text-dark);
+  line-height: 1.6;
+}
+
+/* En-tête */
+.header {
+  background-color: var(--tunisair-blue);
+  color: var(--text-light);
+  padding: 1rem 2rem;
+  box-shadow: var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-weight: bold;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.logo::before {
+  content: "✈";
+  margin-right: 0.5rem;
+}
+
+/* Pages d'authentification */
+.auth-container {
+  background: url('https://example.com/airplane-bg.jpg') no-repeat center center;
+  background-size: cover;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.auth-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 91, 170, 0.7);
+}
+
+.auth-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 450px;
+  z-index: 1;
+  position: relative;
+}
+
+.auth-title {
+  color: var(--tunisair-blue);
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 1.8rem;
+}
+
+/* Formulaires */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: var(--tunisair-blue);
+  box-shadow: 0 0 0 3px rgba(0, 91, 170, 0.1);
+}
+
+.btn {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn-primary {
+  background-color: var(--tunisair-blue);
+  color: white;
+  width: 100%;
+}
+
+.btn-primary:hover {
+  background-color: var(--tunisair-dark);
+}
+
+.btn-secondary {
+  background-color: var(--tunisair-red);
+  color: white;
+}
+
+/* Tableaux de bord */
+.dashboard {
+  display: flex;
+  min-height: calc(100vh - 60px);
+}
+
+.sidebar {
+  width: 250px;
+  background-color: var(--tunisair-dark);
+  color: white;
+  padding: 1.5rem 0;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar-menu li {
+  padding: 0.8rem 1.5rem;
+  transition: background 0.3s ease;
+}
+
+.sidebar-menu li:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-menu a {
+  color: white;
+  text-decoration: none;
+  display: block;
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  background-color: var(--tunisair-light);
+}
+
+.dashboard-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Page d'accueil */
+.landing-hero {
+  background: linear-gradient(rgba(0, 91, 170, 0.8), rgba(0, 51, 102, 0.9)), 
+              url('https://example.com/airport-bg.jpg') no-repeat center center;
+  background-size: cover;
+  color: white;
+  padding: 5rem 2rem;
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboard {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
