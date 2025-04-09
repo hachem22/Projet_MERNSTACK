@@ -4,61 +4,63 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const authRoutes = require('./routes/authRoutes');
-console.log('Configuration JWT:', {
-  secret: process.env.JWT_SECRET ? 'OK' : 'MANQUANT',
-  expire: process.env.JWT_EXPIRE || 'NON DÉFINI'
-});
+
 // Initialisation
 const app = express();
 
-// Middleware CORS amélioré
-app.use(cors({
-    origin: 'http://localhost:3000', // Autorise uniquement le frontend
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
-  }));
+// Configuration CORS complète
+const corsOptions = {
+  origin: 'http://localhost:3000',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+};
 
-// Middleware pour vérifier l'état de la DB
-app.use((req, res, next) => {
-  if (mongoose.connection.readyState !== 1) {
-    console.error('⚠️ Tentative de reconnexion à MongoDB...');
-    require('./config/db')(); // Recharge la connexion
-  }
-  next();
-});
+// Middleware CORS
+app.use(cors(corsOptions));
 
-// Ensure proper body parsing
+// Gestion explicite des requêtes OPTIONS
+app.options('*', cors(corsOptions));
+
+// Middleware pour parser le JSON
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Removed global authentication middleware. Authentication is handled by 'protect' middleware on specific routes.
+// Connexion à MongoDB
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/tunisair', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
 
-// Database connection log (log only once)
-mongoose.connection.once('open', () => {
+mongoose.connection.on('connected', () => {
   console.log('✅ MongoDB connecté');
 });
 
-// Remove redundant database state logs
-mongoose.connection.on('connected', () => {
-  console.log('📌 Événement: MongoDB connecté');
+mongoose.connection.on('error', (err) => {
+  console.error('❌ Erreur MongoDB:', err);
 });
 
 // Routes
-const { protect } = require('./middleware/auth');
-
 app.use('/api/auth', authRoutes);
-app.use('/api/admin', protect, require('./routes/admin'));
+app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/admin', require('./routes/admin'));
 
-// Removed redundant /api/auth/verify route. Use /api/auth/me instead.
+// Middleware pour les headers CORS
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
+
 // Gestion des erreurs
 app.use((err, req, res, next) => {
-  console.error('Erreur globale:', err);
+  console.error('Erreur:', err.stack);
   res.status(500).json({ error: 'Erreur serveur' });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  require('./config/db')(); // Initialise la connexion DB
+  console.log(`Serveur démarré sur le port ${PORT}`);
 });

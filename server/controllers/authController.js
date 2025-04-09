@@ -1,44 +1,69 @@
 const User = require('../models/User');
-const ErrorResponse = require('../utils/errorResponse'); // Créez ce fichier (voir ci-dessous)
+const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 
-// @desc    Register user
+// @desc    Register a new user
+// @access  Public
 exports.register = asyncHandler(async (req, res, next) => {
   const { name, email, password, role } = req.body;
 
-  const userExists = await User.findOne({ email });
-  if (userExists) {
+  // Check if user already exists
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
     return next(new ErrorResponse('Un utilisateur avec cet email existe déjà', 400));
   }
 
-  const user = await User.create({ 
-    name, 
-    email, 
-    password, 
-    role: role || 'user' // Ensure role is set or defaults to 'user'
+  // Create user
+  const user = await User.create({
+    name,
+    email,
+    password,
+    role: role || 'user'
   });
-  sendTokenResponse(user, 201, res);
+
+  // Generate token
+  const token = user.getSignedJwtToken();
+
+  res.status(201).json({
+    success: true,
+    token,
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role
+    }
+  });
 });
 
 // @desc    Login user
+// @access  Public
 exports.login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
 
-  // Validation basique
+  // Validate email & password
   if (!email || !password) {
     return next(new ErrorResponse('Email et mot de passe requis', 400));
   }
 
+  // Check for user
   const user = await User.findOne({ email }).select('+password');
-  
-  if (!user || !(await user.matchPassword(password))) {
+  if (!user) {
     return next(new ErrorResponse('Identifiants invalides', 401));
   }
 
-  // Réponse standardisée
+  // Check if password matches
+  const isMatch = await user.matchPassword(password);
+  if (!isMatch) {
+    return next(new ErrorResponse('Identifiants invalides', 401));
+  }
+
+  // Generate token
+  const token = user.getSignedJwtToken();
+
   res.status(200).json({
     success: true,
-    token: user.getSignedJwtToken(),
+    token,
     user: {
       id: user._id,
       name: user.name,
@@ -48,34 +73,23 @@ exports.login = asyncHandler(async (req, res, next) => {
     redirectTo: user.role === 'admin' ? '/admin-dashboard' : '/client-dashboard'
   });
 });
-exports.getUser = asyncHandler(async (req, res, next) => {
-  const user = await User.findById(req.user.id).select('-password');
-  
-  if (!user) {
-    return next(new ErrorResponse('User not found', 404));
-  }
 
-  res.status(200).json({
-    success: true,
-    user: {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role
-    }
-  });
-});
-// @desc    Get current user
+// @desc    Get current logged in user
+// @access  Private
 exports.getMe = asyncHandler(async (req, res, next) => {
-  const user = await User.findById(req.user.id);
+  const user = await User.findById(req.user.id).select('-password');
+
   res.status(200).json({
     success: true,
     data: user
   });
 });
+
+// @desc    Verify token validity
+// @access  Private
 exports.verifyToken = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user.id).select('-password');
-  
+
   res.status(200).json({
     success: true,
     user: {
@@ -86,13 +100,3 @@ exports.verifyToken = asyncHandler(async (req, res, next) => {
     }
   });
 });
-
-// Helper function
-const sendTokenResponse = (user, statusCode, res) => {
-  const token = user.getSignedJwtToken();
-  
-  res.status(statusCode).json({
-    success: true,
-    token
-  });
-};

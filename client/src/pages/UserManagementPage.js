@@ -1,10 +1,10 @@
 import React from 'react';
 import { Box } from '@mui/material';
-import ClientDashboard from '../components/dashboard/ClientDashboard';
+import UserManagement from '../components/users/UserManagement';
 import { useAuthContext } from '../context/authContext';
 import { useNavigate } from 'react-router-dom';
 
-export default function ClientDashboardPage() {
+export default function UserManagementPage() {
   const { logout } = useAuthContext();
   const navigate = useNavigate();
 
@@ -16,7 +16,7 @@ export default function ClientDashboardPage() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <ClientDashboard />
+      <UserManagement />
     </Box>
   );
 }

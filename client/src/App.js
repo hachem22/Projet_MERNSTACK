@@ -5,6 +5,7 @@ import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import ClientDashboard from './pages/ClientDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import UserManagementPage from './pages/UserManagementPage';
 import LandingPage from './components/layout/LandingPage';
 
 const AppRoutes = () => {
@@ -38,6 +39,14 @@ const AppRoutes = () => {
         element={
           user?.role === 'admin' 
             ? <AdminDashboard /> 
+            : <Navigate to="/login" />
+        }
+      />
+      <Route
+        path="/user-management" 
+        element={
+          user?.role === 'admin'
+            ? <UserManagementPage />
             : <Navigate to="/login" />
         }
       />

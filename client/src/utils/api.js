@@ -1,10 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000', // Replace with your API base URL
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL: 'http://localhost:5001',
+  withCredentials: true
 });
 
 // Add a request interceptor to include the Authorization header

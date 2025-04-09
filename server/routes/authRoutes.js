@@ -1,17 +1,26 @@
 const express = require('express');
-const { 
-  login,
-  register,
-  getMe,  // Assurez-vous que cette fonction existe dans authController
-  getUser // Nouvelle fonction à ajouter
-} = require('../controllers/authController');
+const router = express.Router();
+const authController = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
 
-const router = express.Router();
+// @route   POST /api/auth/login
+// @desc    Authenticate user & get token
+// @access  Public
+router.post('/login', authController.login);
 
-router.post('/login', login);
-router.post('/register', register);
-router.get('/me', protect, getMe);
-router.get('/user', protect, getUser); // Nouvelle route
+// @route   POST /api/auth/register
+// @desc    Register a new user
+// @access  Public
+router.post('/register', authController.register);
+
+// @route   GET /api/auth/me
+// @desc    Get current user data
+// @access  Private
+router.get('/me', protect, authController.getMe);
+
+// @route   GET /api/auth/verify
+// @desc    Verify token validity
+// @access  Private
+router.get('/verify', protect, authController.verifyToken);
 
 module.exports = router;

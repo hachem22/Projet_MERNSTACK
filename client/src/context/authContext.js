@@ -5,60 +5,70 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetchUser();
+    } else {
+      setLoading(false);
+    }
+  }, []);
 
   const fetchUser = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/auth/me');
-      if (response.data.user) {
-        setUser(response.data.user);
-        // La redirection est gérée par l'intercepteur de réponse dans api.js
-      }
-    } catch (error) {
-      console.error('Error fetching user:', error);
+      const { data } = await api.get('/api/auth/me');
+      setUser(data.data);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching user:', err);
       setUser(null);
+      localStorage.removeItem('token');
+      setError(err.response?.data?.message || 'Session expirée');
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchUser();
-  }, []);
-
-  const register = async (formData) => {
+  
+  const login = async (credentials, navigate) => {
     try {
       setLoading(true);
-      setError(null);
-      const response = await api.post('/api/auth/register', formData);
-      setUser(response.data.user);
-      localStorage.setItem('token', response.data.token);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const login = async (formData, navigate) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await api.post('/api/auth/login', formData);
-      setUser(response.data.user);
-      localStorage.setItem('token', response.data.token);
-      console.log('Login successful - Token:', response.data.token);
+      const { data } = await api.post('/api/auth/login', credentials);
       
-      // Redirection basée sur le rôle de l'utilisateur
-      const redirectPath = response.data.user.role === 'admin' 
-        ? '/admin-dashboard' 
-        : '/client-dashboard';
-      navigate(redirectPath);
-      return true;
+      if (data.success && data.token) {
+        localStorage.setItem('token', data.token);
+        setUser(data.user);
+        setError(null);
+        navigate(data.redirectTo || (data.user.role === 'admin' ? '/admin-dashboard' : '/dashboard'));
+        return true;
+      }
+      throw new Error(data.message || 'Login failed');
     } catch (err) {
-      setError(err.response?.data?.message || 'Échec de la connexion');
+      console.error('Login error:', err);
+      setError(err.response?.data?.message || err.message || 'Échec de la connexion');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const register = async (userData) => {
+    try {
+      setLoading(true);
+      const { data } = await api.post('/api/auth/register', userData);
+      
+      if (data.success && data.token) {
+        localStorage.setItem('token', data.token);
+        setUser(data.user);
+        setError(null);
+        return true;
+      }
+      throw new Error(data.message || 'Registration failed');
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || "Échec de l'inscription");
       return false;
     } finally {
       setLoading(false);
@@ -67,7 +77,9 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setUser(null);
+    setError(null);
   };
 
   return (
@@ -75,8 +87,8 @@ export const AuthProvider = ({ children }) => {
       user, 
       loading, 
       error, 
-      register, 
       login, 
+      register, 
       logout,
       fetchUser 
     }}>
@@ -86,7 +98,9 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const useAuthContext = () => {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuthContext must be used within an AuthProvider');
+  }
+  return context;
 };
-
-export default AuthContext;

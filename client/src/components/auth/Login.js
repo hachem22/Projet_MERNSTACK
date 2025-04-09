@@ -17,50 +17,77 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1976d2',
+      main: '#005baa', // Bleu Tunisair
     },
     secondary: {
-      main: '#dc004e',
+      main: '#d40511', // Rouge Tunisair
+    },
+    background: {
+      default: '#f5f9ff', // Fond clair bleuté
     },
   },
+  typography: {
+    fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+    h5: {
+      fontWeight: 600,
+      color: '#005baa'
+    }
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        contained: {
+          borderRadius: '20px',
+          padding: '10px 24px',
+          boxShadow: 'none',
+          textTransform: 'none',
+          fontSize: '1rem'
+        }
+      }
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiOutlinedInput-root': {
+            borderRadius: '10px',
+          }
+        }
+      }
+    }
+  }
 });
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [, setError] = useState(null);
+  const [error, setError] = useState(null);
   const { login } = useAuthContext();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const success = await login({ email, password }, navigate);
-      if (!success) {
-        setError('Identifiants incorrects');
-      }
+      await login({ email, password }, navigate); // Now using the context login
     } catch (err) {
       setError('Erreur lors de la connexion');
     }
   };
-
   return (
     <ThemeProvider theme={theme}>
-      <Container component="main" maxWidth="xs">
+      <Container component="main" maxWidth="xs" sx={{ background: 'white', borderRadius: '16px', boxShadow: '0 8px 32px rgba(0, 91, 170, 0.1)', padding: '40px', marginTop: '80px' }}>
         <CssBaseline />
         <Box
           sx={{
-            marginTop: 8,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-            <LockOutlinedIcon />
+          <Avatar sx={{ m: 2, bgcolor: 'secondary.main', width: 60, height: 60 }}>
+            <LockOutlinedIcon fontSize="medium" />
           </Avatar>
-          <Typography component="h1" variant="h5">
-            Connexion
+          <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
+            Connexion à TunisAir
           </Typography>
           <Box 
             component="form" 
@@ -71,6 +98,12 @@ export default function Login() {
               width: '100%'
             }}
           >
+            {/* Affichage des erreurs */}
+            {error && (
+              <Typography color="error" variant="body2" sx={{ mb: 2 }}>
+                {error}
+              </Typography>
+            )}
             <TextField
               margin="normal"
               required
@@ -99,13 +132,20 @@ export default function Login() {
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              sx={{ 
+                mt: 3, 
+                mb: 2,
+                background: 'linear-gradient(90deg, #005baa 0%, #003366 100%)',
+                '&:hover': {
+                  background: 'linear-gradient(90deg, #003366 0%, #005baa 100%)'
+                }
+              }}
             >
               Se connecter
             </Button>
-            <Box sx={{ textAlign: 'center' }}>
-              <Link href="/register" variant="body2">
-                Pas de compte? S'inscrire
+            <Box sx={{ textAlign: 'center', mt: 2 }}>
+              <Link href="/register" variant="body2" sx={{ color: '#005baa', fontWeight: 500 }}>
+                Pas de compte? Créez votre compte TunisAir
               </Link>
             </Box>
           </Box>

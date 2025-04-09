@@ -3,68 +3,243 @@ import { Box, Container, Typography, Button, AppBar, Toolbar, Paper } from '@mui
 import { Link as RouterLink } from 'react-router-dom';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff'; // Example icon
 
-// Basic Tunisair-like theme colors (adjust as needed)
-const tunisairTheme = {
-  primary: '#D81E05', // Red
-  secondary: '#004B87', // Blue
-  text: '#333333',
-  background: '#f4f4f4',
-};
+// Tunisair official theme colors
+import { tunisairTheme } from '../../theme/tunisairTheme';
 
 const LandingPage = () => {
   return (
     <Box sx={{ flexGrow: 1, backgroundColor: tunisairTheme.background, minHeight: '100vh' }}>
       {/* Header */}
-      <AppBar position="static" sx={{ backgroundColor: tunisairTheme.primary }}>
+      <AppBar position="static" sx={{ 
+        backgroundColor: tunisairTheme.white,
+        color: tunisairTheme.secondary,
+        boxShadow: 'none',
+        borderBottom: `1px solid ${tunisairTheme.secondary}20`
+      }}>
         <Toolbar>
-          <FlightTakeoffIcon sx={{ mr: 2 }} />
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Tunisair Management Portal
+          <FlightTakeoffIcon sx={{ 
+            mr: 2,
+            color: tunisairTheme.primary,
+            fontSize: '2rem'
+          }} />
+          <Typography variant="h6" component="div" sx={{ 
+            flexGrow: 1,
+            fontWeight: 'bold',
+            letterSpacing: '1px'
+          }}>
+            TUNISAIR MANAGEMENT
           </Typography>
-          <Button color="inherit" component={RouterLink} to="/login">Login</Button>
-          <Button color="inherit" component={RouterLink} to="/register">Register</Button>
+          <Button 
+            component={RouterLink} 
+            to="/login"
+            sx={{
+              color: tunisairTheme.secondary,
+              mr: 2,
+              '&:hover': {
+                backgroundColor: `${tunisairTheme.secondary}10`
+              }
+            }}
+          >
+            CONNEXION
+          </Button>
+          <Button 
+            variant="contained"
+            component={RouterLink} 
+            to="/register"
+            sx={{
+              backgroundColor: tunisairTheme.primary,
+              borderRadius: '20px',
+              px: 3,
+              '&:hover': {
+                backgroundColor: '#B5000D'
+              }
+            }}
+          >
+            INSCRIPTION
+          </Button>
         </Toolbar>
       </AppBar>
 
       {/* Hero Section */}
-      <Container maxWidth="md" sx={{ mt: 8, textAlign: 'center' }}>
-        <Typography variant="h2" component="h1" gutterBottom sx={{ color: tunisairTheme.secondary, fontWeight: 'bold' }}>
-          Welcome Aboard
+      <Container maxWidth="md" sx={{ 
+        mt: 8, 
+        textAlign: 'center',
+        py: 8
+      }}>
+        <Typography variant="h2" component="h1" gutterBottom sx={{ 
+          color: tunisairTheme.secondary, 
+          fontWeight: 'bold',
+          fontSize: '3.5rem',
+          mb: 4
+        }}>
+          BIENVENUE À BORD
         </Typography>
-        <Typography variant="h5" color="textSecondary" paragraph sx={{ color: tunisairTheme.text }}>
-          Manage your operations efficiently with the Tunisair Management Portal. Access dashboards, reports, and tools tailored for airline management.
+        <Typography variant="h5" paragraph sx={{ 
+          color: tunisairTheme.text,
+          lineHeight: '1.6',
+          maxWidth: '800px',
+          mx: 'auto',
+          mb: 6
+        }}>
+          Gestion optimisée des opérations Tunisair. Accédez à des tableaux de bord, rapports et outils spécialement conçus pour la gestion aérienne.
         </Typography>
-        <Box sx={{ mt: 4 }}>
-          <Button variant="contained" size="large" component={RouterLink} to="/register" sx={{ mr: 2, backgroundColor: tunisairTheme.primary, '&:hover': { backgroundColor: '#b71c04' } }}>
-            Get Started
+        <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center', gap: 3 }}>
+          <Button 
+            variant="contained" 
+            size="large" 
+            component={RouterLink} 
+            to="/register" 
+            sx={{ 
+              px: 5,
+              py: 1.5,
+              borderRadius: '20px',
+              backgroundColor: tunisairTheme.primary,
+              fontSize: '1.1rem',
+              '&:hover': { 
+                backgroundColor: '#B5000D',
+                transform: 'translateY(-2px)'
+              },
+              transition: 'all 0.3s ease'
+            }}
+          >
+            COMMENCER
           </Button>
-          <Button variant="outlined" size="large" component={RouterLink} to="/login" sx={{ borderColor: tunisairTheme.secondary, color: tunisairTheme.secondary }}>
-            Access Your Account
+          <Button 
+            variant="outlined" 
+            size="large" 
+            component={RouterLink} 
+            to="/login" 
+            sx={{ 
+              px: 5,
+              py: 1.5,
+              borderRadius: '20px',
+              borderColor: tunisairTheme.secondary, 
+              color: tunisairTheme.secondary,
+              fontSize: '1.1rem',
+              '&:hover': {
+                backgroundColor: `${tunisairTheme.secondary}10`,
+                borderColor: tunisairTheme.accent,
+                color: tunisairTheme.accent
+              },
+              transition: 'all 0.3s ease'
+            }}
+          >
+            ACCÉDER À MON COMPTE
           </Button>
         </Box>
       </Container>
 
-      {/* Feature Highlights (Example) */}
+      {/* Feature Highlights */}
       <Container maxWidth="lg" sx={{ mt: 8, mb: 8 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: 2 }}>
-          <Paper elevation={3} sx={{ p: 3, width: '30%', minWidth: '250px', textAlign: 'center' }}>
-            <Typography variant="h6" sx={{ color: tunisairTheme.secondary }}>Dashboards</Typography>
-            <Typography variant="body2" sx={{ color: tunisairTheme.text }}>Visualize key metrics and performance indicators.</Typography>
+        <Typography variant="h3" component="h2" sx={{ 
+          textAlign: 'center',
+          color: tunisairTheme.secondary,
+          mb: 6,
+          fontWeight: 'bold'
+        }}>
+          NOS FONCTIONNALITÉS
+        </Typography>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          flexWrap: 'wrap', 
+          gap: 4
+        }}>
+          <Paper elevation={3} sx={{ 
+            p: 4, 
+            width: '300px', 
+            textAlign: 'center',
+            borderRadius: '12px',
+            transition: 'transform 0.3s ease',
+            '&:hover': {
+              transform: 'translateY(-5px)'
+            }
+          }}>
+            <FlightTakeoffIcon sx={{ 
+              fontSize: '3rem', 
+              color: tunisairTheme.primary,
+              mb: 2
+            }} />
+            <Typography variant="h5" sx={{ 
+              color: tunisairTheme.secondary,
+              mb: 2,
+              fontWeight: '600'
+            }}>
+              TABLEAUX DE BORD
+            </Typography>
+            <Typography variant="body1" sx={{ color: tunisairTheme.text }}>
+              Visualisation des indicateurs clés de performance en temps réel.
+            </Typography>
           </Paper>
-          <Paper elevation={3} sx={{ p: 3, width: '30%', minWidth: '250px', textAlign: 'center' }}>
-            <Typography variant="h6" sx={{ color: tunisairTheme.secondary }}>Reporting</Typography>
-            <Typography variant="body2" sx={{ color: tunisairTheme.text }}>Generate and access detailed operational reports.</Typography>
+          <Paper elevation={3} sx={{ 
+            p: 4, 
+            width: '300px', 
+            textAlign: 'center',
+            borderRadius: '12px',
+            transition: 'transform 0.3s ease',
+            '&:hover': {
+              transform: 'translateY(-5px)'
+            }
+          }}>
+            <FlightTakeoffIcon sx={{ 
+              fontSize: '3rem', 
+              color: tunisairTheme.primary,
+              mb: 2
+            }} />
+            <Typography variant="h5" sx={{ 
+              color: tunisairTheme.secondary,
+              mb: 2,
+              fontWeight: '600'
+            }}>
+              RAPPORTS
+            </Typography>
+            <Typography variant="body1" sx={{ color: tunisairTheme.text }}>
+              Génération de rapports détaillés sur les opérations aériennes.
+            </Typography>
           </Paper>
-          <Paper elevation={3} sx={{ p: 3, width: '30%', minWidth: '250px', textAlign: 'center' }}>
-            <Typography variant="h6" sx={{ color: tunisairTheme.secondary }}>User Management</Typography>
-            <Typography variant="body2" sx={{ color: tunisairTheme.text }}>Control access and roles within the portal.</Typography>
+          <Paper elevation={3} sx={{ 
+            p: 4, 
+            width: '300px', 
+            textAlign: 'center',
+            borderRadius: '12px',
+            transition: 'transform 0.3s ease',
+            '&:hover': {
+              transform: 'translateY(-5px)'
+            }
+          }}>
+            <FlightTakeoffIcon sx={{ 
+              fontSize: '3rem', 
+              color: tunisairTheme.primary,
+              mb: 2
+            }} />
+            <Typography variant="h5" sx={{ 
+              color: tunisairTheme.secondary,
+              mb: 2,
+              fontWeight: '600'
+            }}>
+              GESTION DES UTILISATEURS
+            </Typography>
+            <Typography variant="body1" sx={{ color: tunisairTheme.text }}>
+              Contrôle des accès et des rôles au sein du portail.
+            </Typography>
           </Paper>
         </Box>
       </Container>
 
-      {/* Footer (Example) */}
-      <Box component="footer" sx={{ bgcolor: tunisairTheme.secondary, color: 'white', p: 3, mt: 'auto', textAlign: 'center' }}>
-        <Typography variant="body2">© {new Date().getFullYear()} Tunisair Management Portal. All rights reserved.</Typography>
+      {/* Footer */}
+      <Box component="footer" sx={{ 
+        bgcolor: tunisairTheme.secondary, 
+        color: tunisairTheme.white, 
+        p: 4, 
+        mt: 'auto', 
+        textAlign: 'center'
+      }}>
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+          TUNISAIR MANAGEMENT PORTAL
+        </Typography>
+        <Typography variant="body2">
+          © {new Date().getFullYear()} Tunisair. Tous droits réservés.
+        </Typography>
       </Box>
     </Box>
   );
