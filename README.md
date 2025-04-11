@@ -100,6 +100,7 @@ JWT_SECRET=votre_secret_jwt
 PORT=5000
 ```
 
-## Auteurs
+## les interfaces 
+![Capture d'écran 2025-04-09 154541](https://github.com/user-attachments/assets/a52e6762-dd6e-4f7e-b2c2-a3fe5d67309d)
 
-- [Votre nom/équipe]
+
