@@ -31,7 +31,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // Mount routes
 app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/users', require('./routes/userRoutes')); 
+app.use('/api', require('./routes/admin')); // Ajout de cette ligne
 
 // Error handling
 app.use(errorHandler);

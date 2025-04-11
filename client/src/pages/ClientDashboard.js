@@ -9,9 +9,20 @@ export default function ClientDashboardPage() {
   const navigate = useNavigate();
 
   // eslint-disable-next-line no-unused-vars
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      // Clear all auth-related storage
+      localStorage.removeItem('token');
+      sessionStorage.clear();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Fallback cleanup if logout fails
+      localStorage.removeItem('token');
+      sessionStorage.clear();
+      navigate('/login');
+    }
   };
 
   return (

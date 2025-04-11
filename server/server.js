@@ -40,10 +40,10 @@ mongoose.connection.on('error', (err) => {
   console.error('❌ Erreur MongoDB:', err);
 });
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/users', require('./routes/userRoutes'));
-app.use('/api/admin', require('./routes/admin'));
+// Routes avec versioning
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/users', require('./routes/userRoutes'));
+app.use('/api/v1/admin', require('./routes/admin'));
 
 // Middleware pour les headers CORS
 app.use((req, res, next) => {

@@ -1,59 +1,122 @@
 import React, { useState, useEffect } from 'react';
-import { getUsers, deleteUser } from '../../services/api';
-import { CircularProgress } from '@mui/material';
-import { Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button } from '@mui/material';
+import { getUsers, deleteUser, createUser, updateUser } from '../../services/api';
+import { 
+  CircularProgress,
+  Box, 
+  Typography, 
+  Paper, 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableContainer, 
+  TableHead, 
+  TableRow, 
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  MenuItem,
+  Snackbar,
+  Alert,
+  Select,
+  FormControl,
+  InputLabel
+} from '@mui/material';
 import { tunisairTheme } from '../../theme/tunisairTheme';
 
 const UserManagement = () => {
-  const [users, setUsers] = useState(null); // Initialisé à null pour distinguer "non chargé" de "chargé vide"
+  const [users, setUsers] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [roleFilter, setRoleFilter] = useState('all');
+
+  const roles = ['admin', 'client'];
+
+  const handleOpenDialog = (user = null) => {
+    setCurrentUser(user || { role: 'user' });
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setCurrentUser(null);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (currentUser?._id) {
+        await updateUser(currentUser._id, currentUser);
+        setSnackbar({ open: true, message: 'Utilisateur mis à jour', severity: 'success' });
+      } else {
+        await createUser(currentUser);
+        setSnackbar({ open: true, message: 'Utilisateur créé', severity: 'success' });
+      }
+      fetchUsers();
+      handleCloseDialog();
+    } catch (error) {
+      setSnackbar({ 
+        open: true, 
+        message: error.response?.data?.message || 'Erreur', 
+        severity: 'error' 
+      });
+    }
+  };
 
   const handleDelete = async (userId) => {
-    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
-      return;
-    }
+    if (!window.confirm('Confirmer la suppression ?')) return;
     
     try {
       await deleteUser(userId);
       setUsers(users.filter(user => user._id !== userId));
+      setSnackbar({ open: true, message: 'Utilisateur supprimé', severity: 'success' });
     } catch (error) {
-      console.error('Erreur suppression:', error);
-      setError(error.response?.data?.message || 'Échec de la suppression');
+      setSnackbar({ 
+        open: true, 
+        message: error.response?.data?.message || 'Erreur', 
+        severity: 'error' 
+      });
     }
   };
 
-  const handleUpdate = (userId) => {
-    // Implémentation de la mise à jour
-    console.log('Mise à jour de l\'utilisateur:', userId);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setCurrentUser(prev => ({ ...prev, [name]: value }));
   };
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await getUsers();
-        const usersData = response.data.data || response.data || [];
-        console.log('Données utilisateurs reçues:', {
-          source: 'API',
-          count: usersData.length,
-          sample: usersData.length > 0 ? usersData[0] : 'Aucun utilisateur',
-          status: 'success'
-        });
-        setUsers(usersData);
-      } catch (error) {
-        console.error('Erreur récupération utilisateurs:', {
-          message: error.message,
-          response: error.response?.data,
-          stack: error.stack
-        });
-        setError(error.response?.data?.message || 'Erreur lors du chargement des utilisateurs');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchUsers = async () => {
+    try {
+      console.log('Fetching users from:', `${process.env.REACT_APP_API_URL || 'http://localhost:5001/api/v1'}/users`);
+      const response = await getUsers();
+      // Handle both response formats: 
+      // - Direct array of users
+      // - Or { success, data } format
+      const usersData = Array.isArray(response.data) 
+        ? response.data 
+        : (response.data?.data || []);
+      setUsers(usersData);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      setError(
+        error.response?.data?.error || 
+        error.message || 
+        'Erreur lors du chargement des utilisateurs'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchUsers();
-  }, []);
+  useEffect(() => { fetchUsers(); }, []);
+
+  const filteredUsers = users?.filter(user => 
+    roleFilter === 'all' || user.role === roleFilter
+  );
 
   if (error) {
     return (
@@ -71,6 +134,18 @@ const UserManagement = () => {
     );
   }
 
+  const commonButtonStyle = {
+    primary: {
+      backgroundColor: tunisairTheme.primary,
+      '&:hover': { backgroundColor: '#B5000D' }
+    },
+    secondary: {
+      borderColor: tunisairTheme.secondary,
+      color: tunisairTheme.secondary,
+      '&:hover': { backgroundColor: `${tunisairTheme.secondary}10` }
+    }
+  };
+
   return (
     <Box sx={{ 
       backgroundColor: tunisairTheme.background,
@@ -82,13 +157,36 @@ const UserManagement = () => {
         color: tunisairTheme.primary,
         fontWeight: 'bold',
         textTransform: 'uppercase',
-        letterSpacing: '1px',
         borderBottom: `3px solid ${tunisairTheme.secondary}`,
         display: 'inline-block',
         pb: 1
       }}>
         GESTION DES UTILISATEURS
       </Typography>
+
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+        <FormControl sx={{ minWidth: 120 }}>
+          <InputLabel>Filtrer par rôle</InputLabel>
+          <Select
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+            label="Filtrer par rôle"
+          >
+            <MenuItem value="all">Tous</MenuItem>
+            {roles.map(role => (
+              <MenuItem key={role} value={role}>{role}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <Button 
+          variant="contained"
+          onClick={() => handleOpenDialog()}
+          sx={commonButtonStyle.primary}
+        >
+          Créer un utilisateur
+        </Button>
+      </Box>
 
       <Paper elevation={3} sx={{
         p: 3,
@@ -107,54 +205,118 @@ const UserManagement = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {!loading && (!users || users.length === 0) ? (
+              {filteredUsers?.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} align="center">
                     <Typography variant="body1" color="textSecondary">
-                      {users === null ? 'Chargement en cours...' : 'Aucun utilisateur trouvé'}
+                      Aucun utilisateur trouvé
                     </Typography>
                   </TableCell>
                 </TableRow>
               ) : (
-                users?.map((user) => (
-                  <TableRow key={user._id || user.id}>
-                  <TableCell>{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.role}</TableCell>
-                  <TableCell>
-                    <Button 
-                      variant="contained"
-                      onClick={() => handleUpdate(user._id)}
-                      sx={{
-                        backgroundColor: tunisairTheme.primary,
-                        mr: 1,
-                        '&:hover': {
-                          backgroundColor: '#B5000D'
-                        }
-                      }}
-                    >
-                      Modifier
-                    </Button>
-                    <Button 
-                      variant="outlined"
-                      onClick={() => handleDelete(user._id)}
-                      sx={{
-                        borderColor: tunisairTheme.secondary,
-                        color: tunisairTheme.secondary,
-                        '&:hover': {
-                          backgroundColor: `${tunisairTheme.secondary}10`
-                        }
-                      }}
-                    >
-                      Supprimer
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              )))}
+                filteredUsers?.map((user) => (
+                  <TableRow key={user._id}>
+                    <TableCell>{user.name}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>{user.role}</TableCell>
+                    <TableCell>
+                      <Button 
+                        variant="contained"
+                        onClick={() => handleOpenDialog(user)}
+                        sx={{ ...commonButtonStyle.primary, mr: 1 }}
+                      >
+                        Modifier
+                      </Button>
+                      <Button 
+                        variant="outlined"
+                        onClick={() => handleDelete(user._id)}
+                        sx={commonButtonStyle.secondary}
+                      >
+                        Supprimer
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
       </Paper>
+
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>
+          {currentUser?._id ? 'Modifier utilisateur' : 'Nouvel utilisateur'}
+        </DialogTitle>
+        <DialogContent>
+          <Box component="form" sx={{ mt: 2 }}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Nom"
+              name="name"
+              value={currentUser?.name || ''}
+              onChange={handleChange}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Email"
+              name="email"
+              type="email"
+              value={currentUser?.email || ''}
+              onChange={handleChange}
+            />
+            <TextField
+              margin="normal"
+              fullWidth
+              label="Mot de passe"
+              name="password"
+              type="password"
+              required={!currentUser?._id}
+              onChange={handleChange}
+            />
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Rôle</InputLabel>
+              <Select
+                name="role"
+                value={currentUser?.role || 'user'}
+                onChange={handleChange}
+                label="Rôle"
+              >
+                {roles.map(role => (
+                  <MenuItem key={role} value={role}>{role}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Annuler</Button>
+          <Button 
+            onClick={handleSubmit}
+            variant="contained"
+            sx={commonButtonStyle.primary}
+          >
+            {currentUser?._id ? 'Mettre à jour' : 'Créer'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+      >
+        <Alert 
+          onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

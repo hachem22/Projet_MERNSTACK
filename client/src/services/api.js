@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Configuration de base avec des valeurs par défaut
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api/v1';
 const API_TIMEOUT = 10000; // 10 secondes
 
 // Création de l'instance axios
@@ -75,7 +75,16 @@ api.interceptors.response.use(
 );
 
 // Export des méthodes API spécifiques
-export const getUsers = () => api.get('/users');
+export const getUsers = async () => {
+  try {
+    const response = await api.get('/users');
+    console.log('[DEBUG] API Response:', response);
+    return response;
+  } catch (error) {
+    console.error('[DEBUG] Full API Error:', error);
+    throw error;
+  }
+};
 export const getUserById = (id) => api.get(`/users/${id}`);
 export const createUser = (userData) => api.post('/users', userData);
 export const updateUser = (id, userData) => api.put(`/users/${id}`, userData);

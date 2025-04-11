@@ -1,16 +1,23 @@
 const User = require('../models/User');
-const ErrorResponse = (message, statusCode) => {
-    const error = new Error(message);
-    error.statusCode = statusCode;
-    return error;
-  };
+const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
+const advancedResults = require('../middleware/advancedResults');
 
 // @desc    Get all users
 // @route   GET /api/users
-// @access  Private/Admin
+// @access  Public (temporarily)
 exports.getUsers = asyncHandler(async (req, res, next) => {
-  res.status(200).json(res.advancedResults);
+  try {
+    const users = await User.find();
+    res.status(200).json({
+      success: true,
+      count: users.length,
+      data: users
+    });
+  } catch (err) {
+    console.error('[ERROR] in getUsers:', err);
+    return next(new ErrorResponse('Erreur serveur', 500));
+  }
 });
 
 // @desc    Get single user
@@ -18,7 +25,6 @@ exports.getUsers = asyncHandler(async (req, res, next) => {
 // @access  Private/Admin
 exports.getUser = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.params.id);
-
   res.status(200).json({
     success: true,
     data: user
@@ -30,7 +36,6 @@ exports.getUser = asyncHandler(async (req, res, next) => {
 // @access  Private/Admin
 exports.createUser = asyncHandler(async (req, res, next) => {
   const user = await User.create(req.body);
-
   res.status(201).json({
     success: true,
     data: user
@@ -45,7 +50,6 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
     new: true,
     runValidators: true
   });
-
   res.status(200).json({
     success: true,
     data: user
@@ -57,7 +61,6 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
 // @access  Private/Admin
 exports.deleteUser = asyncHandler(async (req, res, next) => {
   await User.findByIdAndDelete(req.params.id);
-
   res.status(200).json({
     success: true,
     data: {}
@@ -68,8 +71,7 @@ exports.deleteUser = asyncHandler(async (req, res, next) => {
 // @route   GET /api/admin/users
 // @access  Private/Admin
 exports.getAdminUsers = asyncHandler(async (req, res, next) => {
-  const users = await User.find({ role: 'admin' }); // Adjust query as needed
-
+  const users = await User.find({ role: 'admin' });
   res.status(200).json({
     success: true,
     data: users

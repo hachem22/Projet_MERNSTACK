@@ -23,4 +23,9 @@ router.get('/me', protect, authController.getMe);
 // @access  Private
 router.get('/verify', protect, authController.verifyToken);
 
+// @route   GET /api/auth/check-email
+// @desc    Check if email exists
+// @access  Public
+router.get('/check-email', authController.checkEmail);
+
 module.exports = router;

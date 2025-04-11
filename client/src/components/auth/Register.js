@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
 import { useAuthContext } from '../../context/authContext';
 import {
   Container,
@@ -13,7 +16,9 @@ import {
 } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 const theme = createTheme({
   palette: {
     primary: {
@@ -63,18 +68,31 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [, setError] = useState(null);
   const { register } = useAuthContext();
-
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const success = await register({ name, email, password });
-      if (!success) {
+      if (success) {
+        setOpen(true);
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
+      } else {
         setError("Erreur lors de l'inscription");
       }
     } catch (err) {
       setError("Erreur lors de l'inscription");
     }
   };
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpen(false);
+  };
+
 
   return (
     <ThemeProvider theme={theme}>
@@ -157,6 +175,11 @@ export default function Register() {
           </Box>
         </Box>
       </Container>
+      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+  <Alert onClose={handleClose} severity="success" sx={{ width: '100%' }}>
+    Compte créé avec succès! Redirection vers la page de connexion...
+  </Alert>
+</Snackbar>
     </ThemeProvider>
   );
 }

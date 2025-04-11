@@ -24,9 +24,25 @@ exports.protect = asyncHandler(async (req, res, next) => {
 });
 exports.authorize = (...roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
-      return next(new ErrorResponse(`Role ${req.user.role} is not authorized`, 403));
+    if (!req.user || !req.user.role) {
+      return next(new ErrorResponse('Accès non autorisé - Rôle manquant', 403));
     }
+    
+    // Convertir en string et normaliser la casse
+    const userRole = String(req.user.role).toLowerCase().trim();
+    const allowedRoles = roles.map(role => 
+      String(role).toLowerCase().trim()
+    );
+    
+    console.log('[AUTH] Checking authorization for role:', userRole);
+    console.log('[AUTH] Allowed roles:', allowedRoles);
+    
+    if (!allowedRoles.includes(userRole)) {
+      console.log('[AUTH] Access denied for role:', userRole);
+      return next(new ErrorResponse(`Rôle ${req.user.role} non autorisé`, 403));
+    }
+    
+    console.log('[AUTH] Access granted for role:', userRole);
     next();
   };
 };

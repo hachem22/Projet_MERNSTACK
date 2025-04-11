@@ -1,6 +1,6 @@
 import { useAuthContext } from '../../context/authContext'; // Modification ici
 import { Box, Typography, Button, Paper, Grid } from '@mui/material';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
@@ -10,11 +10,17 @@ import { tunisairTheme } from '../../theme/tunisairTheme';
 
 const ClientDashboard = () => {
   const { user, logout } = useAuthContext();
-  const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      // Force page reload to clear any cached state
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Fallback redirect if logout fails
+      window.location.href = '/login';
+    }
   };
 
   return (
